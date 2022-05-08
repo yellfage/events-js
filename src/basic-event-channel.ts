@@ -1,6 +1,6 @@
-import type { EventChannel } from 'src/event-channel'
-
 import type { Callback } from './callback'
+
+import type { EventChannel } from './event-channel'
 
 export class BasicEventChannel<THandler extends Callback>
   implements EventChannel<THandler>
