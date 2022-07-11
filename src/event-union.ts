@@ -14,5 +14,9 @@ export interface EventUnion<TEventMap extends Record<string, Callback>> {
   emit<TEventName extends keyof TEventMap>(
     eventName: TEventName,
     ...args: Parameters<TEventMap[TEventName]>
+  ): void
+  emitSequentially<TEventName extends keyof TEventMap>(
+    eventName: TEventName,
+    ...args: Parameters<TEventMap[TEventName]>
   ): Promise<void>
 }

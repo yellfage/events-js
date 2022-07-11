@@ -29,7 +29,11 @@ export class BasicEventChannel<THandler extends Callback>
     return new BasicEventChannel(this.handlers)
   }
 
-  public async emit(...args: Parameters<THandler>): Promise<void> {
+  public emit(...args: Parameters<THandler>): void {
+    this.handlers.forEach((handler) => handler(...args))
+  }
+
+  public async emitSequentially(...args: Parameters<THandler>): Promise<void> {
     // Handlers need to be cloned, because it may happen
     // that the executing handler deletes and adds itself,
     // and this will trigger one more call

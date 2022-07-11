@@ -54,16 +54,17 @@ export class BasicEventUnion<TEventMap extends Record<string, Callback>>
     return new BasicEventUnion(eventMap)
   }
 
-  public async emit<TEventName extends keyof TEventMap>(
+  public emit<TEventName extends keyof TEventMap>(
+    eventName: TEventName,
+    ...args: Parameters<TEventMap[TEventName]>
+  ): void {
+    this.eventMap.get(eventName)?.emit(...args)
+  }
+
+  public async emitSequentially<TEventName extends keyof TEventMap>(
     eventName: TEventName,
     ...args: Parameters<TEventMap[TEventName]>
   ): Promise<void> {
-    const channel = this.eventMap.get(eventName)
-
-    if (!channel) {
-      return
-    }
-
-    return channel.emit(...args)
+    return this.eventMap.get(eventName)?.emitSequentially(...args)
   }
 }
