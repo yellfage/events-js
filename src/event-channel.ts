@@ -20,7 +20,7 @@ export class EventChannel<TArgs extends unknown[]> implements EventPool<TArgs> {
   }
 
   public once(handler: Callback<TArgs>): Callback<TArgs> {
-    this.handlers.add(handler)
+    this.on(handler)
 
     const remove = this.on(() => {
       this.off(handler)
