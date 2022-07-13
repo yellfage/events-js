@@ -44,7 +44,19 @@ export class EventUnion<TEventMap extends Record<string, unknown[]>> {
     eventName: TEventName,
     handler: Callback<TEventMap[TEventName]>,
   ): void {
-    this.eventMap.get(eventName)?.off(handler)
+    const channel = this.eventMap.get(eventName)
+
+    if (!channel) {
+      return
+    }
+
+    if (channel.size <= 1) {
+      this.eventMap.delete(eventName)
+
+      return
+    }
+
+    channel.off(handler)
   }
 
   public offAll<TEventName extends keyof TEventMap>(
