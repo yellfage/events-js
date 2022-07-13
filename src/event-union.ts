@@ -15,7 +15,7 @@ export class EventUnion<TEventMap extends Record<string, unknown[]>> {
     eventName: TEventName,
     handler: Callback<TEventMap[TEventName]>,
     maxCallCount?: number,
-  ): Callback<TEventMap[TEventName]> {
+  ): () => void {
     const channel = this.eventMap.get(eventName) ?? new EventChannel()
 
     if (!this.eventMap.has(eventName)) {
@@ -28,7 +28,7 @@ export class EventUnion<TEventMap extends Record<string, unknown[]>> {
   public once<TEventName extends keyof TEventMap>(
     eventName: TEventName,
     handler: Callback<TEventMap[TEventName]>,
-  ): Callback<TEventMap[TEventName]> {
+  ): () => void {
     return this.on(eventName, handler, 1)
   }
 

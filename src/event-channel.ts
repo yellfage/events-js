@@ -13,8 +13,10 @@ export class EventChannel<TArgs extends unknown[]> implements EventPool<TArgs> {
     this.handlers = new Map(handlers)
   }
 
-  public on(handler: Callback<TArgs>, maxCallCount = -1): Callback<TArgs> {
+  public on(handler: Callback<TArgs>, maxCallCount = -1): () => void {
     let callsCount = 0
+
+    const offHandler = (): void => this.off(handler)
 
     this.handlers.set(handler, (...args) => {
       handler(...args)
@@ -22,14 +24,14 @@ export class EventChannel<TArgs extends unknown[]> implements EventPool<TArgs> {
       callsCount += 1
 
       if (callsCount >= maxCallCount) {
-        this.off(handler)
+        offHandler()
       }
     })
 
-    return handler
+    return offHandler
   }
 
-  public once(handler: Callback<TArgs>): Callback<TArgs> {
+  public once(handler: Callback<TArgs>): () => void {
     return this.on(handler, 1)
   }
 
