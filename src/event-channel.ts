@@ -33,9 +33,9 @@ export class EventChannel<THandler extends Callback>
     this.handlers.forEach((handler) => handler(...args))
   }
 
-  public async emitSequentially(...args: Parameters<THandler>): Promise<void> {
+  public async invoke(...args: Parameters<THandler>): Promise<void> {
     // Handlers need to be cloned, because it may happen
-    // that the executing handler deletes and adds itself,
+    // that the executing handler deletes and adds itself
     // and this will trigger one more call
     for (const handler of [...this.handlers]) {
       // eslint-disable-next-line no-await-in-loop

@@ -55,10 +55,10 @@ export class EventUnion<TEventMap extends Record<string, Callback>> {
     this.eventMap.get(eventName)?.emit(...args)
   }
 
-  public async emitSequentially<TEventName extends keyof TEventMap>(
+  public async invoke<TEventName extends keyof TEventMap>(
     eventName: TEventName,
     ...args: Parameters<TEventMap[TEventName]>
   ): Promise<void> {
-    return this.eventMap.get(eventName)?.emitSequentially(...args)
+    return this.eventMap.get(eventName)?.invoke(...args)
   }
 }
