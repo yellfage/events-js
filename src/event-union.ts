@@ -53,6 +53,10 @@ export class EventUnion<TEventMap extends Record<string, unknown[]>> {
     this.eventMap.delete(eventName)
   }
 
+  public clear(): void {
+    this.eventMap.clear()
+  }
+
   public clone(): EventUnion<TEventMap> {
     const eventMap = Array.from(this.eventMap).reduce(
       (map, [key, value]) => map.set(key, value.clone()),
