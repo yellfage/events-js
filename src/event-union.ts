@@ -47,7 +47,7 @@ export class EventUnion<TEventMap extends Record<string, unknown[]>> {
     this.eventMap.get(eventName)?.off(handler)
   }
 
-  public clear<TEventName extends keyof TEventMap>(
+  public offAll<TEventName extends keyof TEventMap>(
     eventName: TEventName,
   ): void {
     this.eventMap.delete(eventName)

@@ -30,7 +30,7 @@ export class EventChannel<TArgs extends unknown[]> implements EventPool<TArgs> {
     this.handlers.delete(handler)
   }
 
-  public clear(): void {
+  public offAll(): void {
     this.handlers.clear()
   }
 
