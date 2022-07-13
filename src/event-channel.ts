@@ -2,22 +2,31 @@ import type { Callback } from './callback'
 
 import type { EventPool } from './event-pool'
 
-export class EventChannel<THandler extends Callback>
-  implements EventPool<THandler>
-{
-  private readonly handlers: Set<THandler>
+export class EventChannel<TArgs extends unknown[]> implements EventPool<TArgs> {
+  private readonly handlers: Set<Callback<TArgs>>
 
-  public constructor(handlers: THandler[] | Set<THandler> = []) {
+  public constructor(handlers?: Iterable<Callback<TArgs>>) {
     this.handlers = new Set(handlers)
   }
 
-  public add(handler: THandler): THandler {
+  public on(handler: Callback<TArgs>): Callback<TArgs> {
     this.handlers.add(handler)
 
     return handler
   }
 
-  public remove(handler: THandler): void {
+  public once(handler: Callback<TArgs>): Callback<TArgs> {
+    this.handlers.add(handler)
+
+    const remove = this.on(() => {
+      this.off(handler)
+      this.off(remove)
+    })
+
+    return handler
+  }
+
+  public off(handler: Callback<TArgs>): void {
     this.handlers.delete(handler)
   }
 
@@ -25,15 +34,15 @@ export class EventChannel<THandler extends Callback>
     this.handlers.clear()
   }
 
-  public clone(): EventChannel<THandler> {
+  public clone(): EventChannel<TArgs> {
     return new EventChannel(this.handlers)
   }
 
-  public emit(...args: Parameters<THandler>): void {
+  public emit(...args: TArgs): void {
     this.handlers.forEach((handler) => handler(...args))
   }
 
-  public async invoke(...args: Parameters<THandler>): Promise<void> {
+  public async invoke(...args: TArgs): Promise<void> {
     // Handlers need to be cloned, because it may happen
     // that the executing handler deletes and adds itself
     // and this will trigger one more call

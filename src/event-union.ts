@@ -2,35 +2,49 @@ import type { Callback } from './callback'
 
 import { EventChannel } from './event-channel'
 
-export class EventUnion<TEventMap extends Record<string, Callback>> {
-  private readonly eventMap: Map<keyof TEventMap, EventChannel<Callback>>
+export class EventUnion<TEventMap extends Record<string, unknown[]>> {
+  private readonly eventMap: Map<keyof TEventMap, EventChannel<unknown[]>>
 
   public constructor(
-    eventMap: Map<keyof TEventMap, EventChannel<Callback>> = new Map(),
+    eventMap: Map<keyof TEventMap, EventChannel<unknown[]>> = new Map(),
   ) {
     this.eventMap = eventMap
   }
 
-  public add<TEventName extends keyof TEventMap>(
+  public on<TEventName extends keyof TEventMap>(
     eventName: TEventName,
-    handler: TEventMap[TEventName],
-  ): TEventMap[TEventName] {
+    handler: Callback<TEventMap[TEventName]>,
+  ): Callback<TEventMap[TEventName]> {
     const channel = this.eventMap.get(eventName) ?? new EventChannel()
 
     if (!this.eventMap.has(eventName)) {
       this.eventMap.set(eventName, channel)
     }
 
-    channel.add(handler)
+    channel.on(handler)
 
     return handler
   }
 
-  public remove<TEventName extends keyof TEventMap>(
+  public once<TEventName extends keyof TEventMap>(
     eventName: TEventName,
-    handler: TEventMap[TEventName],
+    handler: Callback<TEventMap[TEventName]>,
+  ): Callback<TEventMap[TEventName]> {
+    this.on(eventName, handler)
+
+    const remove = this.on(eventName, () => {
+      this.off(eventName, handler)
+      this.off(eventName, remove)
+    })
+
+    return handler
+  }
+
+  public off<TEventName extends keyof TEventMap>(
+    eventName: TEventName,
+    handler: Callback<TEventMap[TEventName]>,
   ): void {
-    this.eventMap.get(eventName)?.remove(handler)
+    this.eventMap.get(eventName)?.off(handler)
   }
 
   public clear<TEventName extends keyof TEventMap>(
@@ -42,7 +56,7 @@ export class EventUnion<TEventMap extends Record<string, Callback>> {
   public clone(): EventUnion<TEventMap> {
     const eventMap = Array.from(this.eventMap).reduce(
       (map, [key, value]) => map.set(key, value.clone()),
-      new Map<keyof TEventMap, EventChannel<Callback>>(),
+      new Map<keyof TEventMap, EventChannel<unknown[]>>(),
     )
 
     return new EventUnion(eventMap)
@@ -50,14 +64,14 @@ export class EventUnion<TEventMap extends Record<string, Callback>> {
 
   public emit<TEventName extends keyof TEventMap>(
     eventName: TEventName,
-    ...args: Parameters<TEventMap[TEventName]>
+    ...args: TEventMap[TEventName]
   ): void {
     this.eventMap.get(eventName)?.emit(...args)
   }
 
   public async invoke<TEventName extends keyof TEventMap>(
     eventName: TEventName,
-    ...args: Parameters<TEventMap[TEventName]>
+    ...args: TEventMap[TEventName]
   ): Promise<void> {
     return this.eventMap.get(eventName)?.invoke(...args)
   }
