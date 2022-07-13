@@ -3,6 +3,10 @@ import type { Callback } from './callback'
 import type { EventPool } from './event-pool'
 
 export class EventChannel<TArgs extends unknown[]> implements EventPool<TArgs> {
+  public get size(): number {
+    return this.handlers.size
+  }
+
   private readonly handlers: Set<Callback<TArgs>>
 
   public constructor(handlers?: Iterable<Callback<TArgs>>) {
