@@ -7,27 +7,30 @@ export class EventChannel<TArgs extends unknown[]> implements EventPool<TArgs> {
     return this.handlers.size
   }
 
-  private readonly handlers: Set<Callback<TArgs>>
+  private readonly handlers: Map<Callback<TArgs>, Callback<TArgs>>
 
-  public constructor(handlers?: Iterable<Callback<TArgs>>) {
-    this.handlers = new Set(handlers)
+  public constructor(handlers?: Iterable<[Callback<TArgs>, Callback<TArgs>]>) {
+    this.handlers = new Map(handlers)
   }
 
-  public on(handler: Callback<TArgs>): Callback<TArgs> {
-    this.handlers.add(handler)
+  public on(handler: Callback<TArgs>, maxCallCount = -1): Callback<TArgs> {
+    let callsCount = 0
+
+    this.handlers.set(handler, (...args) => {
+      handler(...args)
+
+      callsCount += 1
+
+      if (callsCount >= maxCallCount) {
+        this.off(handler)
+      }
+    })
 
     return handler
   }
 
   public once(handler: Callback<TArgs>): Callback<TArgs> {
-    this.on(handler)
-
-    const remove = this.on(() => {
-      this.off(handler)
-      this.off(remove)
-    })
-
-    return handler
+    return this.on(handler, 1)
   }
 
   public off(handler: Callback<TArgs>): void {
@@ -47,10 +50,7 @@ export class EventChannel<TArgs extends unknown[]> implements EventPool<TArgs> {
   }
 
   public async invoke(...args: TArgs): Promise<void> {
-    // Handlers need to be cloned, because it may happen
-    // that the executing handler deletes and adds itself
-    // and this will trigger one more call
-    for (const handler of [...this.handlers]) {
+    for (const handler of this.handlers.values()) {
       // eslint-disable-next-line no-await-in-loop
       await handler(...args)
     }

@@ -14,6 +14,7 @@ export class EventUnion<TEventMap extends Record<string, unknown[]>> {
   public on<TEventName extends keyof TEventMap>(
     eventName: TEventName,
     handler: Callback<TEventMap[TEventName]>,
+    maxCallCount?: number,
   ): Callback<TEventMap[TEventName]> {
     const channel = this.eventMap.get(eventName) ?? new EventChannel()
 
@@ -21,48 +22,27 @@ export class EventUnion<TEventMap extends Record<string, unknown[]>> {
       this.eventMap.set(eventName, channel)
     }
 
-    channel.on(handler)
-
-    return handler
+    return channel.on(handler, maxCallCount)
   }
 
   public once<TEventName extends keyof TEventMap>(
     eventName: TEventName,
     handler: Callback<TEventMap[TEventName]>,
   ): Callback<TEventMap[TEventName]> {
-    this.on(eventName, handler)
-
-    const remove = this.on(eventName, () => {
-      this.off(eventName, handler)
-      this.off(eventName, remove)
-    })
-
-    return handler
+    return this.on(eventName, handler, 1)
   }
 
   public off<TEventName extends keyof TEventMap>(
     eventName: TEventName,
     handler: Callback<TEventMap[TEventName]>,
   ): void {
-    const channel = this.eventMap.get(eventName)
-
-    if (!channel) {
-      return
-    }
-
-    if (channel.size <= 1) {
-      this.eventMap.delete(eventName)
-
-      return
-    }
-
-    channel.off(handler)
+    this.eventMap.get(eventName)?.off(handler)
   }
 
   public offAll<TEventName extends keyof TEventMap>(
     eventName: TEventName,
   ): void {
-    this.eventMap.delete(eventName)
+    this.eventMap.get(eventName)?.offAll()
   }
 
   public clear(): void {
