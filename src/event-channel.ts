@@ -23,7 +23,7 @@ export class EventChannel<TArgs extends unknown[]> implements EventPool<TArgs> {
 
       callsCount += 1
 
-      if (callsCount >= maxCallCount) {
+      if (maxCallCount > 0 && callsCount >= maxCallCount) {
         offHandler()
       }
     })
