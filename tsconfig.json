@@ -1,0 +1,25 @@
+{
+  "include": ["./src"],
+  "compilerOptions": {
+    "lib": ["es2022"],
+    "target": "es2015",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "baseUrl": "./",
+    "verbatimModuleSyntax": true,
+    "strictNullChecks": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "alwaysStrict": true,
+    "noEmitOnError": true,
+    "sourceMap": true,
+    "declaration": true,
+    "declarationDir": "./dist",
+    "noImplicitOverride": true,
+    "noUncheckedIndexedAccess": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}

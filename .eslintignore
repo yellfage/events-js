@@ -1,0 +1,8 @@
+node_modules
+dist
+
+.commitlintrc.js
+.eslintrc.js
+.lintstagedrc.js
+.prettierrc.js
+webpack.config.js
